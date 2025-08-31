@@ -18,7 +18,7 @@
     <description>Demo project for Chain Workflow pattern with Spring AI</description>
 
     <properties>
-        <java.version>21</java.version>         <!-- Prefer LTS -->
+        <java.version>24</java.version>
         <spring-ai.version>1.0.1</spring-ai.version>
     </properties>
 
