@@ -3,7 +3,6 @@ package com.hrpd.onboarding.chain.steps;
 import com.hrpd.onboarding.chain.Ctx;
 import com.hrpd.onboarding.chain.Step;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
  * Step 3: Generate a grounded draft answer using ONLY the retrieved passages.
  * This prevents hallucinations and encourages citations.
  */
-@Component
 public class DraftAnswerStep implements Step {
 
     private final ChatModel model;

@@ -5,7 +5,6 @@ import com.hrpd.onboarding.chain.Step;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -14,7 +13,6 @@ import java.time.Duration;
 /**
  * Step 2: Retrieve relevant passages for grounding.
  */
-@Component
 public class RetrieveStep implements Step {
 
     private final VectorStore vectorStore;

@@ -53,7 +53,8 @@ User Query → Intent Classification → Retrieval → Answer Drafting → Valid
 
 - **`Step` Interface**: Defines the contract for all chain steps
 - **`Ctx` (Context)**: Immutable data structure that flows through the chain
-- **`OnboardingChainOrchestrator`**: Coordinates the execution of all steps
+- **`ChainWorkflowOrchestratorService` Interface**: Defines the contract for the orchestrator service
+- **`OnboardingChainOrchestratorService`**: Orchestrator service implementation that coordinates the execution of all steps
 
 ### Context Flow
 

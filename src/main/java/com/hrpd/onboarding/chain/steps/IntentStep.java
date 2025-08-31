@@ -3,7 +3,6 @@ package com.hrpd.onboarding.chain.steps;
 import com.hrpd.onboarding.chain.Ctx;
 import com.hrpd.onboarding.chain.Step;
 import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -12,7 +11,6 @@ import java.time.Duration;
 /**
  * Step 1: Classify user input into a predefined label.
  */
-@Component
 public class IntentStep implements Step {
 
     private final ChatModel model;

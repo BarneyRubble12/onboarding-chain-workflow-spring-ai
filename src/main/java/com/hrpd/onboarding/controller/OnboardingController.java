@@ -1,6 +1,6 @@
 package com.hrpd.onboarding.controller;
 
-import com.hrpd.onboarding.chain.OnboardingChainOrchestrator;
+import com.hrpd.onboarding.chain.orchestrator.ChainWorkflowOrchestratorService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,10 +19,10 @@ public class OnboardingController {
     /** Response DTO for /ask endpoint. */
     private record AskRes(String intent, String answer) {}
 
-    private final OnboardingChainOrchestrator chainOrchestrator;
+    private final ChainWorkflowOrchestratorService chainOrchestratorService;
 
-    public OnboardingController(OnboardingChainOrchestrator chainOrchestrator) {
-        this.chainOrchestrator = chainOrchestrator;
+    public OnboardingController(ChainWorkflowOrchestratorService chainOrchestratorService) {
+        this.chainOrchestratorService = chainOrchestratorService;
     }
 
     /**
@@ -36,7 +36,7 @@ public class OnboardingController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<AskRes> ask(@RequestBody AskReq askReq) {
-        return chainOrchestrator
+        return chainOrchestratorService
                 .run(askReq.text())
                 .map(ctx -> new AskRes(ctx.intent(), ctx.draftAnswer()));
     }

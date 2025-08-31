@@ -3,12 +3,10 @@ package com.hrpd.onboarding.persistence.TicketRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.r2dbc.core.DatabaseClient;
-import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-@Repository
 public class TicketRepository {
 
     private final DatabaseClient dbClient;

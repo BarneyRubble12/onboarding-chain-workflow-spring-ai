@@ -2,14 +2,12 @@ package com.hrpd.onboarding.chain.steps;
 
 import com.hrpd.onboarding.chain.Ctx;
 import com.hrpd.onboarding.chain.Step;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 /**
  * Step 4: Validate the draft answer (placeholder implementation).
  * In a real implementation, this would validate structure, compliance, etc.
  */
-@Component
 public class ValidateStep implements Step {
 
     @Override
