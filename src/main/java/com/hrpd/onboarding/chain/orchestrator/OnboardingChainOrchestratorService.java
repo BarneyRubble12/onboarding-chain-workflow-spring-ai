@@ -3,6 +3,8 @@ package com.hrpd.onboarding.chain.orchestrator;
 import com.hrpd.onboarding.chain.Ctx;
 import com.hrpd.onboarding.chain.Step;
 import com.hrpd.onboarding.chain.steps.*;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
@@ -22,20 +24,11 @@ import java.util.List;
  *  <li>Each step runs with timeouts and light retry to improve resiliency.</li>
  *  <li>Any failure fails the whole chain (propagates an error).</li>
  */
+@RequiredArgsConstructor
+@Slf4j
 public class OnboardingChainOrchestratorService implements ChainWorkflowOrchestratorService {
 
     private final List<Step> steps;
-
-    public OnboardingChainOrchestratorService(
-            IntentStep s1, RetrieveStep s2, DraftAnswerStep s3, ValidateStep s4, PersistStep s5
-    ) {
-        this.steps = List.of(s1, s2, s3, s4, s5);
-    }
-
-    public OnboardingChainOrchestratorService(Step... steps) {
-        this.steps = Arrays.asList(steps);
-    }
-
 
     public Mono<Ctx> run(String userText) {
         Ctx seed = new Ctx(userText, null, List.of(), null, new java.util.HashMap<>());

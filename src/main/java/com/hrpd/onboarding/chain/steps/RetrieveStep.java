@@ -2,6 +2,8 @@ package com.hrpd.onboarding.chain.steps;
 
 import com.hrpd.onboarding.chain.Ctx;
 import com.hrpd.onboarding.chain.Step;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -13,13 +15,11 @@ import java.time.Duration;
 /**
  * Step 2: Retrieve relevant passages for grounding.
  */
+@RequiredArgsConstructor
+@Slf4j
 public class RetrieveStep implements Step {
 
     private final VectorStore vectorStore;
-
-    public RetrieveStep(VectorStore vectorStore) {
-        this.vectorStore = vectorStore;
-    }
 
     @Override
     public Mono<Ctx> apply(Ctx ctx) {

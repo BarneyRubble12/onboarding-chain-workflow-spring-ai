@@ -2,6 +2,8 @@ package com.hrpd.onboarding.chain.steps;
 
 import com.hrpd.onboarding.chain.Ctx;
 import com.hrpd.onboarding.chain.Step;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -11,14 +13,11 @@ import java.time.Duration;
 /**
  * Step 1: Classify user input into a predefined label.
  */
+@RequiredArgsConstructor
+@Slf4j
 public class IntentStep implements Step {
 
     private final ChatModel model;
-
-    public IntentStep(ChatModel model) {
-        this.model = model;
-    }
-
 
     @Override
     public Mono<Ctx> apply(Ctx ctx) {

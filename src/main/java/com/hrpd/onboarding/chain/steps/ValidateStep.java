@@ -2,12 +2,14 @@ package com.hrpd.onboarding.chain.steps;
 
 import com.hrpd.onboarding.chain.Ctx;
 import com.hrpd.onboarding.chain.Step;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 /**
  * Step 4: Validate the draft answer (placeholder implementation).
  * In a real implementation, this would validate structure, compliance, etc.
  */
+@Slf4j
 public class ValidateStep implements Step {
 
     @Override
