@@ -31,20 +31,62 @@ public class OnboardingChainOrchestratorService implements ChainWorkflowOrchestr
     private final List<Step> steps;
 
     public Mono<Ctx> run(String userText) {
+        log.info("🚀 STARTING CHAIN WORKFLOW");
+        log.info("📝 User Input: '{}'", userText);
+        log.info("🔗 Total Steps in Chain: {}", steps.size());
+        
         Ctx seed = new Ctx(userText, null, List.of(), null, new java.util.HashMap<>());
         Mono<Ctx> flow = Mono.just(seed);
 
         // Compose steps sequentially
-        for (Step s : steps) {
-            flow = flow.flatMap(ctx -> s.apply(ctx)
+        for (int i = 0; i < steps.size(); i++) {
+            Step s = steps.get(i);
+            final int stepNumber = i + 1;
+            final String stepName = s.getClass().getSimpleName();
+            
+            log.info("⏭️  STEP {}: {} - Starting execution", stepNumber, stepName);
+            
+            flow = flow.flatMap(ctx -> {
+                log.info("📊 STEP {}: {} - Input Context: intent='{}', passages={}, hasDraft={}", 
+                    stepNumber, stepName, 
+                    ctx.intent() != null ? ctx.intent() : "null",
+                    ctx.passages().size(),
+                    ctx.draftAnswer() != null ? "yes" : "no");
+                
+                return s.apply(ctx)
+                    .doOnSuccess(resultCtx -> {
+                        log.info("✅ STEP {}: {} - COMPLETED SUCCESSFULLY", stepNumber, stepName);
+                        log.info("📊 STEP {}: {} - Output Context: intent='{}', passages={}, hasDraft={}", 
+                            stepNumber, stepName,
+                            resultCtx.intent() != null ? resultCtx.intent() : "null",
+                            resultCtx.passages().size(),
+                            resultCtx.draftAnswer() != null ? "yes" : "no");
+                    })
+                    .doOnError(error -> {
+                        log.error("❌ STEP {}: {} - FAILED with error: {}", stepNumber, stepName, error.getMessage());
+                    })
                     .retryWhen(
                             // retry once on transient errors (e.g., timeouts)
                             Retry.fixedDelay(1, Duration.ofMillis(200))
                     )
-                    .onErrorResume(ex -> Mono.error(
-                            new RuntimeException("Failed in " + s.getClass().getSimpleName() + ": " + ex.getMessage(), ex)
-                    )));
+                    .onErrorResume(ex -> {
+                        log.error("💥 STEP {}: {} - FINAL FAILURE after retry: {}", stepNumber, stepName, ex.getMessage());
+                        return Mono.error(
+                                new RuntimeException("Failed in " + stepName + ": " + ex.getMessage(), ex)
+                        );
+                    });
+            });
         }
-        return flow;
+        
+        return flow.doOnSuccess(finalCtx -> {
+            log.info("🎉 CHAIN WORKFLOW COMPLETED SUCCESSFULLY!");
+            log.info("📋 Final Result Summary:");
+            log.info("   - Intent: {}", finalCtx.intent());
+            log.info("   - Passages Retrieved: {}", finalCtx.passages().size());
+            log.info("   - Draft Answer Length: {} characters", 
+                finalCtx.draftAnswer() != null ? finalCtx.draftAnswer().length() : 0);
+        }).doOnError(error -> {
+            log.error("💥 CHAIN WORKFLOW FAILED: {}", error.getMessage());
+        });
     }
 }

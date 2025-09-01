@@ -21,16 +21,38 @@ public class IntentStep implements Step {
 
     @Override
     public Mono<Ctx> apply(Ctx ctx) {
+        log.info("🎯 INTENT STEP: Starting intent classification");
+        log.info("🎯 INTENT STEP: User text: '{}'", ctx.userText());
+        
         var prompt = """
           You are a classifier. Respond with ONLY ONE label:
           [ONBOARDING_IT, ONBOARDING_HR, BENEFITS, VACATIONS, POLICIES, OTHER]
           Text: "%s"
         """.formatted(ctx.userText());
 
+        log.info("🎯 INTENT STEP: Sending classification prompt to LLM");
+        log.debug("🎯 INTENT STEP: Prompt: {}", prompt);
+
         return Mono
-                .fromCallable(() -> model.call(prompt))
+                .fromCallable(() -> {
+                    log.info("🎯 INTENT STEP: Calling LLM for classification...");
+                    return model.call(prompt);
+                })
                 .publishOn(Schedulers.boundedElastic())
-                .map(label -> ctx.withIntent(label.trim().toUpperCase()))
+                .doOnSuccess(rawResponse -> {
+                    log.info("🎯 INTENT STEP: LLM response received: '{}'", rawResponse);
+                })
+                .map(label -> {
+                    String cleanLabel = label.trim().toUpperCase();
+                    log.info("🎯 INTENT STEP: Classified intent: '{}'", cleanLabel);
+                    return ctx.withIntent(cleanLabel);
+                })
+                .doOnSuccess(resultCtx -> {
+                    log.info("🎯 INTENT STEP: Intent classification completed successfully");
+                })
+                .doOnError(error -> {
+                    log.error("🎯 INTENT STEP: Intent classification failed: {}", error.getMessage());
+                })
                 .timeout(Duration.ofSeconds(10));
     }
 }

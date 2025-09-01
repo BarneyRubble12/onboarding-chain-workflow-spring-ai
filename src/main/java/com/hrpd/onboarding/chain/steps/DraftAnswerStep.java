@@ -23,12 +23,20 @@ public class DraftAnswerStep implements Step {
 
     @Override
     public Mono<Ctx> apply(Ctx ctx) {
+        log.info("✍️  DRAFT ANSWER STEP: Starting answer generation");
+        log.info("✍️  DRAFT ANSWER STEP: User text: '{}'", ctx.userText());
+        log.info("✍️  DRAFT ANSWER STEP: Intent: '{}'", ctx.intent());
+        log.info("✍️  DRAFT ANSWER STEP: Available passages: {}", ctx.passages().size());
+        
         // Join passages into a simple, bullet-like context.
         var context = ctx
                 .passages()
                 .stream()
                 .map(p -> "- " + p.replace("\n", " ").trim())
                 .collect(Collectors.joining("\n"));
+
+        log.info("✍️  DRAFT ANSWER STEP: Prepared context with {} passages", ctx.passages().size());
+        log.debug("✍️  DRAFT ANSWER STEP: Context length: {} characters", context.length());
 
         // Grounding prompt: force the model to only use the provided context.
         String prompt = """
@@ -49,9 +57,29 @@ public class DraftAnswerStep implements Step {
         - Final section: "References" with [#] and a short title.
         """.formatted(context, ctx.intent(), ctx.userText());
 
-        return Mono.fromCallable(() -> model.call(prompt))
-                .publishOn(Schedulers.boundedElastic())
-                .map(ctx::withDraft)
-                .timeout(Duration.ofSeconds(12));
+        log.info("✍️  DRAFT ANSWER STEP: Sending generation prompt to LLM");
+        log.debug("✍️  DRAFT ANSWER STEP: Prompt length: {} characters", prompt.length());
+
+        return Mono.fromCallable(() -> {
+                log.info("✍️  DRAFT ANSWER STEP: Calling LLM for answer generation...");
+                return model.call(prompt);
+            })
+            .publishOn(Schedulers.boundedElastic())
+            .doOnSuccess(rawResponse -> {
+                log.info("✍️  DRAFT ANSWER STEP: LLM response received");
+                log.info("✍️  DRAFT ANSWER STEP: Generated answer length: {} characters", 
+                    rawResponse != null ? rawResponse.length() : 0);
+                log.debug("✍️  DRAFT ANSWER STEP: Generated answer: {}", rawResponse);
+            })
+            .doOnError(error -> {
+                log.error("✍️  DRAFT ANSWER STEP: Answer generation failed: {}", error.getMessage());
+            })
+            .map(ctx::withDraft)
+            .doOnSuccess(resultCtx -> {
+                log.info("✍️  DRAFT ANSWER STEP: Answer generation completed successfully");
+                log.info("✍️  DRAFT ANSWER STEP: Final answer length: {} characters", 
+                    resultCtx.draftAnswer() != null ? resultCtx.draftAnswer().length() : 0);
+            })
+            .timeout(Duration.ofSeconds(12));
     }
 }
